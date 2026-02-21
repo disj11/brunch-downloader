@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "브런치스토리 글 다운로더",
+  "version": "1.0.0",
+  "description": "브런치스토리 작가의 글을 Markdown으로 다운로드",
+  "permissions": ["downloads", "scripting", "activeTab", "alarms"],
+  "host_permissions": ["https://brunch.co.kr/*"],
+  "action": {
+    "default_popup": "src/ui/index.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/infrastructure/background/service-worker.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://brunch.co.kr/*"],
+      "js": ["src/infrastructure/content/content.ts"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
