@@ -14,19 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0  # 태그 조회를 위해 전체 히스토리 fetch
 
       - name: Check version change
         id: version
         run: |
           CURRENT=$(jq -r '.version' package.json)
-          PREV=$(git show HEAD~1:package.json 2>/dev/null | jq -r '.version' 2>/dev/null || echo "")
           echo "current=$CURRENT" >> $GITHUB_OUTPUT
-          echo "prev=$PREV" >> $GITHUB_OUTPUT
-          if [ "$CURRENT" != "$PREV" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
+          # v{version} 태그가 없으면 새 버전으로 판단
+          if git ls-remote --tags origin "refs/tags/v$CURRENT" | grep -q "v$CURRENT"; then
             echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
       - uses: pnpm/action-setup@v4
