@@ -54,10 +54,25 @@ jobs:
           cd dist
           zip -r ../brunch-downloader-v${{ steps.version.outputs.current }}.zip .
 
+      - name: Extract changelog
+        if: steps.version.outputs.changed == 'true'
+        id: changelog
+        run: |
+          VERSION=${{ steps.version.outputs.current }}
+          # 해당 버전 섹션(## [x.y.z] ~ 다음 ## [) 추출
+          NOTES=$(awk "/^## \[$VERSION\]/{found=1; next} /^## \[/{if(found) exit} found{print}" CHANGELOG.md)
+          # 멀티라인을 GITHUB_OUTPUT에 저장
+          {
+            echo "notes<<EOF"
+            echo "$NOTES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         if: steps.version.outputs.changed == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.current }}
           name: v${{ steps.version.outputs.current }}
+          body: ${{ steps.changelog.outputs.notes }}
           files: brunch-downloader-v${{ steps.version.outputs.current }}.zip
